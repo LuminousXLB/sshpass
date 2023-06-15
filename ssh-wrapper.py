@@ -7,22 +7,19 @@ from pathlib import Path
 
 if __name__ == "__main__":
     # build args
+    prog = "ssh"
     args = []
-    if len(sys.argv) < 2:
-        args.append("ssh")
+
+    if len(sys.argv) > 1 and sys.argv[1] in ("ssh", "scp", "sftp"):
+        prog = sys.argv[1]
+        args = sys.argv[2:]
     else:
-        args.append(sys.argv[1])
+        args = sys.argv[1:]
 
-    stem = Path(sys.argv[0]).stem
-    args.append(
-        {
-            "ssh-xacc": "xacchead",
-            "ssh-socks": "ssocks",
-        }[stem]
-    )
-
-    if len(sys.argv) > 2:
-        args.extend(sys.argv[2:])
+    dest = {
+        "ssh-xacc": "xacchead",
+        "ssh-socks": "ssocks",
+    }[Path(sys.argv[0]).stem]
 
     # build envs
     envs = os.environ.copy()
@@ -33,4 +30,5 @@ if __name__ == "__main__":
         envs["DISPLAY"] = ":0"
 
     # run
-    os.execvpe(args[0], args, envs)
+    print(prog, dest, *args)
+    os.execvpe(prog, [prog, dest, *args], envs)
